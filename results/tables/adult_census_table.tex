@@ -1,0 +1,16 @@
+\begin{table}[htbp]
+\caption{Green AI Evaluation Results for UCI Adult Census Income Benchmark}
+\label{tab:adult_census_results}
+\begin{tabular}{lrrrrrrrrrr}
+\toprule
+Model & Accuracy & Precision & Recall & F1 & CPU (\%) & RAM (MB) & Train Time (s) & Energy (J) & GAI & Rank \\
+\midrule
+Decision Tree & 0.8638 & 0.8580 & 0.8638 & 0.8565 & 20.5200 & 279.9900 & 0.2842 & 6.2585 & 0.9203 & 1 \\
+LightGBM & 0.8820 & 0.8782 & 0.8820 & 0.8787 & 40.4100 & 280.4100 & 0.1873 & 5.6031 & 0.9000 & 2 \\
+Logistic Regression & 0.8600 & 0.8547 & 0.8600 & 0.8559 & 33.4500 & 285.1200 & 0.3339 & 8.3529 & 0.8664 & 3 \\
+XGBoost & 0.8834 & 0.8797 & 0.8834 & 0.8801 & 49.4300 & 280.8400 & 0.8565 & 21.3799 & 0.7656 & 4 \\
+Random Forest & 0.8670 & 0.8617 & 0.8670 & 0.8596 & 73.9300 & 294.7900 & 0.9427 & 28.4646 & 0.5558 & 5 \\
+CatBoost & 0.8730 & 0.8683 & 0.8730 & 0.8686 & 44.0100 & 299.0200 & 1.7130 & 39.4975 & 0.5480 & 6 \\
+\bottomrule
+\end{tabular}
+\end{table}

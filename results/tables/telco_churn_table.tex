@@ -1,0 +1,16 @@
+\begin{table}[htbp]
+\caption{Green AI Evaluation Results for Telco Customer Churn Benchmark}
+\label{tab:telco_churn_results}
+\begin{tabular}{lrrrrrrrrrr}
+\toprule
+Model & Accuracy & Precision & Recall & F1 & CPU (\%) & RAM (MB) & Train Time (s) & Energy (J) & GAI & Rank \\
+\midrule
+Decision Tree & 0.7559 & 0.7546 & 0.7559 & 0.7552 & 12.9500 & 242.0300 & 0.0551 & 1.2916 & 0.8492 & 1 \\
+Logistic Regression & 0.8055 & 0.7979 & 0.8055 & 0.8002 & 2.0800 & 257.3600 & 0.0354 & 0.0392 & 0.8294 & 2 \\
+LightGBM & 0.7913 & 0.7819 & 0.7913 & 0.7847 & 39.6000 & 248.8400 & 0.1298 & 5.4342 & 0.7404 & 3 \\
+XGBoost & 0.7963 & 0.7876 & 0.7963 & 0.7902 & 47.0600 & 247.1800 & 0.4165 & 15.6941 & 0.6408 & 4 \\
+Random Forest & 0.7984 & 0.7904 & 0.7984 & 0.7929 & 39.0500 & 256.6900 & 0.3083 & 10.8749 & 0.5903 & 5 \\
+CatBoost & 0.8041 & 0.7951 & 0.8041 & 0.7972 & 36.3400 & 258.1200 & 0.8558 & 27.5446 & 0.4796 & 6 \\
+\bottomrule
+\end{tabular}
+\end{table}

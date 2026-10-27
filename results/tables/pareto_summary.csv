@@ -1,0 +1,7 @@
+dataset,model_name,f1_score,energy_joules,gai_linear,pareto_optimal,rank_gai
+adult_census,Decision Tree,0.8565,6.2585,0.9203,False,1
+adult_census,LightGBM,0.8787,5.6031,0.9,True,2
+adult_census,Logistic Regression,0.8559,8.3529,0.8664,False,3
+adult_census,XGBoost,0.8801,21.3799,0.7656,True,4
+adult_census,Random Forest,0.8596,28.4646,0.5558,False,5
+adult_census,CatBoost,0.8686,39.4975,0.548,False,6

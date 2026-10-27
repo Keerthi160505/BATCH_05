@@ -1,0 +1,33 @@
+{
+  "timestamp_utc": "2026-10-26T16:28:34.884111+00:00",
+  "platform": {
+    "system": "Windows",
+    "release": "11",
+    "machine": "AMD64",
+    "processor": "Intel(R) Core(TM) i5-10210U CPU @ 1.60GHz",
+    "physical_cores": 4,
+    "logical_cores": 8,
+    "total_ram_gb": 15.76,
+    "python_version": "3.14.2 (tags/v3.14.2:df79316, Dec  5 2025, 17:18:21) [MSC v.1944 64 bit (AMD64)]"
+  },
+  "experiment_configuration": {
+    "alpha": 0.5,
+    "runs_per_model": 1,
+    "datasets_evaluated": [
+      "adult_census",
+      "telco_churn",
+      "breast_cancer"
+    ],
+    "models_evaluated": [
+      "Decision Tree",
+      "LightGBM",
+      "Logistic Regression",
+      "XGBoost",
+      "Random Forest",
+      "CatBoost"
+    ],
+    "total_benchmark_runs": 6,
+    "profiling_methodology": "Asynchronous 20ms Riemann numerical integration of TDP-calibrated power model (CPU + DRAM)",
+    "gpu_scope": "Unsupported and not claimed; CPU-only profiling"
+  }
+}

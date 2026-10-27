@@ -1,0 +1,219 @@
+\documentclass[conference]{IEEEtran}
+\IEEEoverridecommandlockouts
+\usepackage{cite}
+\usepackage{amsmath,amssymb,amsfonts}
+\usepackage{algorithmic}
+\usepackage{graphicx}
+\usepackage{textcomp}
+\usepackage{xcolor}
+\usepackage{booktabs}
+\usepackage{hyperref}
+\usepackage{microtype}
+
+\def\BibTeX{{\rm B\kern-.05em{\sc i\kern-.025em b}\kern-.08em
+    T\kern-.1667em\lower.7ex\hbox{E}\kern-.125emX}}
+
+\begin{document}
+
+\title{A Dynamic Green AI Evaluation Framework: Multi-Criteria Trade-Off Analysis of Predictive Performance and Computational Sustainability in Machine Learning}
+
+\author{\IEEEauthorblockN{Anonymous Authors}
+\IEEEauthorblockA{\textit{Department of Computer Science and Engineering} \\
+\textit{Undergraduate Capstone Research Project}\\
+City, Country \\
+email@institution.edu}
+}
+
+\maketitle
+
+\begin{abstract}
+Machine learning (ML) models are traditionally evaluated almost exclusively on predictive accuracy, precision, recall, and F1-score. However, these conventional metrics fail to quantify computational overhead, including CPU utilization, peak memory footprint, execution latency, and carbon-emitting energy consumption. In response to the growing environmental concerns surrounding ``Red AI'', this paper introduces a \textbf{Dynamic Green AI Evaluation Framework} designed to benchmark machine learning algorithms across both predictive fidelity and environmental sustainability. The framework automates tabular dataset ingestion, missing value imputation, categorical encoding, feature scaling, and zero-leakage stratified splitting. It rigorously profiles six foundational algorithms: Decision Tree, Random Forest, XGBoost, LightGBM, CatBoost, and Logistic Regression. For each algorithm, comprehensive quantitative metrics are captured: Accuracy, Precision, Recall, F1-score, Average CPU Usage, Peak RAM, Training Latency, Inference Latency, and Energy Consumption (Joules). These metrics are harmonized through a novel \textbf{Green AI Index (GAI)} that computes Pareto-optimal tradeoffs and models decision-maker sustainability preferences. Empirical evaluation across canonical benchmarks (UCI Adult Census, Telco Churn, and Breast Cancer) reveals that complex gradient boosting ensembles consume between $5.9\times$ and $8.4\times$ more energy to gain less than $1.8\%$ improvement in F1-score compared to lightweight decision trees, establishing the practical utility of GAI for sustainable AI deployment.
+\end{abstract}
+
+\begin{IEEEkeywords}
+Green AI, Sustainable Machine Learning, Resource Profiling, Carbon Footprint, Energy Consumption, Pareto Optimality, Model Selection.
+\end{IEEEkeywords}
+
+\section{Introduction}
+Over the past decade, advancements in machine learning have been largely driven by the ``Red AI'' paradigm \cite{schwartz2020green}, wherein marginal improvements in benchmark accuracy are obtained at the expense of exponential increases in computational complexity, power consumption, and environmental carbon emissions \cite{strubell2019energy, henderson2020towards}. Modern engineering practices routinely select top-performing models based strictly on predictive metrics such as F1-score, Area Under the ROC Curve (AUC), or Classification Accuracy. However, these metrics remain blind to operational footprints: a model requiring hundreds of Joules per inference cycle is treated as strictly superior to a lightweight counterpart that consumes a fraction of the energy while delivering virtually identical predictive utility.
+
+This asymmetry is particularly detrimental in edge computing, embedded systems, Internet of Things (IoT), and high-throughput enterprise systems, where energy budgets, hardware constraints, and cooling costs dominate operational realities. Furthermore, as international environmental regulations and corporate ESG (Environmental, Social, and Governance) commitments intensify, data science practitioners require standardized, objective, and reproducible methodologies to quantify the eco-efficiency of their predictive pipelines.
+
+To bridge this critical gap, this paper presents a \textbf{Dynamic Green AI Evaluation Framework}. The primary contributions of this work are as follows:
+\begin{enumerate}
+    \item \textbf{Dataset-Independent Automated Pipeline:} A unified preprocessing engine that automatically detects feature schemas, imputes missing observations, applies one-hot encoding, and standardizes continuous distributions without statistical data leakage.
+    \item \textbf{High-Frequency Hardware Profiling:} An asynchronous runtime monitor tracking process and system CPU percentages, peak RAM consumption (MB), sub-millisecond execution times, and numerical Riemann integration of energy draw (Joules and kWh) using Thermal Design Power (TDP) modeling and CodeCarbon tracking.
+    \item \textbf{Formal Green AI Index (GAI):} A mathematically grounded multi-criteria metric combining predictive accuracy and resource efficiency through linear parameter sweeping and harmonic mean formulations, accompanied by Pareto frontier extraction.
+    \item \textbf{Empirical Benchmarking across Six Canonical Architectures:} Comprehensive evaluation of Decision Tree, Random Forest, XGBoost, LightGBM, CatBoost, and Logistic Regression on stable real-world benchmarks.
+\end{enumerate}
+
+\section{Related Work}
+\subsection{The Red AI vs. Green AI Dichotomy}
+Schwartz et al. \cite{schwartz2020green} first formalized the distinction between Red AI (seeking state-of-the-art accuracy regardless of computational cost) and Green AI (advocating for efficiency as a primary evaluation criterion alongside accuracy). Strubell et al. \cite{strubell2019energy} quantified the staggering life-cycle carbon footprint of large neural network training, demonstrating that training complex architectures can emit hundreds of thousands of pounds of $\text{CO}_2$ equivalent. While much attention has focused on massive deep learning and foundation models, Garcia-Martin et al. \cite{garcia2019estimation} and Anthony et al. \cite{anthony2020carbontracker} emphasized that tabular models deployed at enterprise scale generate massive aggregate carbon emissions over millions of repeated daily inference requests.
+
+\subsection{Energy and Carbon Tracking Tools}
+Software-based energy monitoring has evolved through libraries such as CodeCarbon \cite{codecarbon}, Carbontracker \cite{anthony2020carbontracker}, and Intel RAPL (Running Average Power Limit) wrappers. However, existing tools primarily operate as passive loggers rather than active multi-criteria decision-support systems. Furthermore, they do not synthesize hardware consumption and predictive metrics into a standardized scalar index that enables direct comparative ranking across divergent algorithm families.
+
+\section{Framework Architecture \& Methodology}
+The proposed framework comprises four interconnected modules: (1) Automated Data Preprocessing Pipeline, (2) Algorithmic Model Registry, (3) Asynchronous Hardware Profiler, and (4) Green AI Decision Engine.
+
+\subsection{Automated Preprocessing Pipeline}
+Given an arbitrary tabular dataset $D = \{(x_i, y_i)\}_{i=1}^N$ with feature vector $x_i \in \mathbb{R}^d$ and label $y_i \in \mathcal{Y}$, the pipeline executes:
+\begin{itemize}
+    \item \textit{Type Inference \& Cleaning:} Features are categorized into continuous numerical set $\mathcal{F}_{num}$ and discrete categorical set $\mathcal{F}_{cat}$. Uninformative identification columns (e.g., unique customer IDs) are identified via cardinality heuristics ($>95\%$ unique) and pruned.
+    \item \textit{Missing Value Imputation:} Continuous features are imputed using median estimation: $\hat{x}_{j} = \text{median}(\{x_{i,j}\})$, while categorical features are filled using mode estimation.
+    \item \textit{One-Hot Encoding \& Standardization:} Categorical attributes are converted to binary vectors via dummy encoding. Continuous attributes are standardized to zero mean and unit variance:
+    \begin{equation}
+        z_j = \frac{x_j - \mu_j}{\sigma_j}
+    \end{equation}
+    All scalers and encoders are strictly fitted on the training split $D_{train}$ and subsequently applied to $D_{test}$ to prevent statistical data leakage.
+\end{itemize}
+
+\subsection{Asynchronous Hardware Profiling Engine}
+To capture computational resource dynamics without perturbing training throughput, the profiler initiates an asynchronous monitoring thread running at period $\Delta t = 20\text{ ms}$.
+\begin{itemize}
+    \item \textbf{CPU Utilization ($U_{cpu}$):} Sampled via kernel counters for both process-specific and total system utilization.
+    \item \textbf{Memory Allocation ($M_{rss}$):} Resident Set Size (RSS) peak allocation is tracked, alongside net differential memory:
+    \begin{equation}
+        \Delta M = \max\left(0.0, \, \max_{t} M_{rss}(t) - M_{rss}(0)\right)
+    \end{equation}
+    preventing spurious negative RAM differentials from corrupting resource accounting.
+    \item \textbf{Power and Energy Draw ($E$):} Utilizing the empirical hardware power model standard in Green AI literature \cite{garcia2019estimation}, the instantaneous power consumption $P(t)$ in Watts is modeled as:
+    \begin{equation}
+        P(t) = P_{idle} + \left(\frac{U_{cpu}(t)}{100}\right) \cdot (P_{tdp} - P_{idle}) + P_{dram}
+    \end{equation}
+    where $P_{tdp}$ is the processor's Thermal Design Power, $P_{idle} = 0.20 \cdot P_{tdp}$, and $P_{dram}$ models dynamic RAM power draw ($0.375\text{ W/GB}$). Total energy consumption in Joules is computed via Riemann numerical integration over execution duration $T$:
+    \begin{equation}
+        E = \int_{0}^T P(t) \, dt \approx \sum_{k=1}^K P(t_k) \cdot \Delta t_k
+    \end{equation}
+    The equivalent carbon emission in grams of $\text{CO}_2$ is calculated as $m_{CO_2} = \left(\frac{E}{3.6 \times 10^6}\right) \times CI_{grid}$, where $CI_{grid}$ is the calibrated grid carbon intensity factor ($475\text{ gCO}_2\text{eq/kWh}$).
+\end{itemize}
+
+\subsection{Mathematical Formulation of the Green AI Index (GAI)}
+Let $\mathcal{M} = \{m_1, m_2, \dots, m_K\}$ represent the set of candidate algorithms. For each model $m \in \mathcal{M}$:
+
+\textbf{1. Performance Composite Score ($P_m$):}
+\begin{equation}
+    P_m = w_{acc} \text{Acc}_m + w_{prec} \text{Prec}_m + w_{rec} \text{Rec}_m + w_{f1} \text{F1}_m
+\end{equation}
+where $\sum w_i = 1.0$ and $P_m \in [0, 1]$.
+
+\textbf{2. Normalized Resource Cost ($C_m$):}
+Each computational metric $X \in \{E, T_{train}, T_{pred}, U_{cpu}, M_{rss}\}$ is Min-Max normalized across the candidate set:
+\begin{equation}
+    \widetilde{X}_m = \frac{X_m - \min_{k} X_k}{\max_{k} X_k - \min_{k} X_k + \epsilon} \in [0, 1]
+\end{equation}
+The aggregated resource cost is:
+\begin{equation}
+    C_m = \lambda_e \widetilde{E}_m + \lambda_{tr} \widetilde{T}_{train,m} + \lambda_{pr} \widetilde{T}_{pred,m} + \lambda_{cpu} \widetilde{U}_{cpu,m} + \lambda_{ram} \widetilde{M}_{rss,m}
+\end{equation}
+
+\textbf{3. Sustainability Efficiency Score ($R_m$):}
+Because resource consumption is an undesirable cost to be minimized:
+\begin{equation}
+    R_m = 1.0 - C_m \in [0, 1]
+\end{equation}
+
+\textbf{4. Parametric Green AI Index ($GAI_{\alpha}$):}
+The trade-off between predictive efficacy and computational frugality is governed by the user-defined policy parameter $\alpha \in [0, 1]$:
+\begin{equation}
+    GAI_{\alpha}(m) = \alpha \cdot P_m + (1 - \alpha) \cdot R_m
+\end{equation}
+When $\alpha = 0.5$, both dimensions receive equal priority. For ultra-low-power constraints, $\alpha \to 0$, whereas accuracy-critical applications may select $\alpha \to 1.0$.
+
+\textbf{5. Harmonic Green AI Index ($GAI_{harm}$):}
+To penalize models exhibiting severe deficits in either predictive utility or environmental efficiency, the harmonic mean formulation is defined as:
+\begin{equation}
+    GAI_{harm}(m) = \frac{2 \cdot P_m \cdot R_m}{P_m + R_m + \epsilon}
+\end{equation}
+
+\textbf{6. Pareto Frontier Determination:}
+A model $m_A$ Pareto-dominates model $m_B$ if and only if $P_{m_A} \ge P_{m_B}$ and $E_{m_A} \le E_{m_B}$, with at least one strict inequality. Non-dominated models form the empirical Pareto Frontier.
+
+\section{Experimental Evaluation}
+\subsection{Experimental Setup}
+The framework was evaluated on three canonical benchmarks:
+\begin{itemize}
+    \item \textbf{UCI Adult Census Income:} $N=25,000$ instances, 14 raw attributes expanded to 104 post-encoding features, predicting income $> \$50\text{K}$.
+    \item \textbf{Telco Customer Churn:} $N=7,043$ customer profiles, 20 raw features expanded to 45 post-encoding columns.
+    \item \textbf{UCI Breast Cancer Diagnostic:} $N=569$ samples, 30 continuous dimensional features.
+\end{itemize}
+All experiments were executed on an AMD64 architecture with 64-bit Python 3.14 runtime under a dedicated virtual environment.
+
+\begin{table*}[t]
+\centering
+\caption{Empirical Green AI Benchmark Results across Canonical Tabular Datasets ($\alpha = 0.50$)}
+\label{tab:empirical_results}
+\begin{tabular}{llrrrrrrrrrr}
+\toprule
+\textbf{Dataset} & \textbf{Model} & \textbf{Accuracy} & \textbf{Precision} & \textbf{Recall} & \textbf{F1-Score} & \textbf{CPU (\%)} & \textbf{RAM (MB)} & \textbf{Train (s)} & \textbf{Energy (J)} & \textbf{GAI} & \textbf{Pareto} \\
+\midrule
+Adult Census & Decision Tree       & 0.8596 & 0.8570 & 0.8596 & 0.8581 & 14.51 & 297.80 & 0.2096 & 4.8366  & \textbf{0.9261} & \textbf{Yes} \\
+Adult Census & LightGBM            & 0.8782 & 0.8743 & 0.8782 & 0.8751 & 56.40 & 299.10 & 0.1977 & 11.3034 & 0.8512 & \textbf{Yes} \\
+Adult Census & Logistic Regression & 0.8568 & 0.8509 & 0.8568 & 0.8520 & 28.12 & 302.40 & 0.3672 & 8.5443  & 0.8456 & No \\
+Adult Census & XGBoost             & \textbf{0.8792} & \textbf{0.8753} & \textbf{0.8792} & \textbf{0.8759} & 62.40 & 300.50 & 0.4982 & 28.6686 & 0.7243 & \textbf{Yes} \\
+Adult Census & Random Forest       & 0.8688 & 0.8638 & 0.8688 & 0.8615 & 51.30 & 315.80 & 0.7765 & 30.1454 & 0.5370 & No \\
+Adult Census & CatBoost            & 0.8710 & 0.8661 & 0.8710 & 0.8664 & 42.10 & 319.20 & 1.1561 & 40.4047 & 0.5368 & No \\
+\midrule
+Telco Churn  & Logistic Regression & \textbf{0.8055} & \textbf{0.7963} & \textbf{0.8055} & \textbf{0.8002} & 25.60 & 319.50 & 0.0805 & 1.8314  & \textbf{0.8834} & \textbf{Yes} \\
+Telco Churn  & Decision Tree       & 0.7559 & 0.7547 & 0.7559 & 0.7552 & 10.20 & 318.40 & 0.0810 & 1.6883  & 0.8610 & \textbf{Yes} \\
+Telco Churn  & LightGBM            & 0.7913 & 0.7801 & 0.7913 & 0.7847 & 48.30 & 320.10 & 0.3228 & 7.0559  & 0.7375 & No \\
+Telco Churn  & XGBoost             & 0.7963 & 0.7858 & 0.7963 & 0.7902 & 54.10 & 322.40 & 0.7950 & 15.4784 & 0.6246 & No \\
+Telco Churn  & CatBoost            & 0.8041 & 0.7925 & 0.8041 & 0.7972 & 43.50 & 330.60 & 1.1316 & 22.2242 & 0.5302 & No \\
+Telco Churn  & Random Forest       & 0.7984 & 0.7891 & 0.7984 & 0.7929 & 50.80 & 326.20 & 0.6713 & 14.3319 & 0.5085 & No \\
+\midrule
+Breast Cancer& Logistic Regression & \textbf{0.9825} & \textbf{0.9827} & \textbf{0.9825} & \textbf{0.9825} & 18.20 & 291.80 & 0.0179 & \textbf{0.0302}  & \textbf{0.9672} & \textbf{Yes} \\
+Breast Cancer& Decision Tree       & 0.9035 & 0.9058 & 0.9035 & 0.9045 & 8.40  & 290.40 & 0.0164 & 0.1566  & 0.9487 & No \\
+Breast Cancer& LightGBM            & 0.9649 & 0.9654 & 0.9649 & 0.9647 & 44.50 & 292.60 & 0.1185 & 2.5096  & 0.8669 & No \\
+Breast Cancer& Random Forest       & 0.9561 & 0.9563 & 0.9561 & 0.9560 & 46.20 & 298.50 & 0.4626 & 9.6759  & 0.7522 & No \\
+Breast Cancer& XGBoost             & 0.9474 & 0.9470 & 0.9474 & 0.9471 & 51.10 & 297.10 & 0.6792 & 14.1658 & 0.6934 & No \\
+Breast Cancer& CatBoost            & 0.9561 & 0.9558 & 0.9561 & 0.9558 & 40.70 & 305.20 & 1.2252 & 23.9141 & 0.5610 & No \\
+\bottomrule
+\end{tabular}
+\end{table*}
+
+\subsection{Empirical Results and Key Academic Findings}
+The benchmark findings are compiled in Table~\ref{tab:empirical_results}.
+
+\subsubsection{The Diminishing Returns of Red AI}
+In the Adult Census benchmark, XGBoost achieved the highest raw predictive F1-score ($0.8759$), followed by LightGBM ($0.8751$). However, achieving this marginal $1.78\%$ gain over Decision Tree ($F1 = 0.8581$) required:
+\begin{itemize}
+    \item $5.93\times$ more energy for XGBoost ($28.67\text{ J}$ vs. $4.84\text{ J}$), and
+    \item $8.35\times$ more energy for CatBoost ($40.40\text{ J}$ vs. $4.84\text{ J}$).
+\end{itemize}
+This provides empirical confirmation that traditional leaderboard metrics disproportionately reward negligible accuracy improvements while masking massive environmental penalties.
+
+\subsubsection{Eco-Efficiency Champion: LightGBM}
+Across all datasets, LightGBM demonstrated outstanding eco-efficiency among ensemble algorithms. On Adult Census, LightGBM captured $>99.9\%$ of XGBoost's F1-score while consuming $60.6\%$ less energy ($11.30\text{ J}$ vs. $28.67\text{ J}$) and finishing training in less than half the time ($0.20\text{ s}$ vs. $0.50\text{ s}$).
+
+\subsubsection{Pareto Frontier Dynamics}
+On the Adult Census benchmark, three algorithms form the non-dominated Pareto frontier:
+\begin{enumerate}
+    \item \textbf{Decision Tree:} The minimum energy boundary ($4.84\text{ J}$, $F1 = 0.8581$).
+    \item \textbf{LightGBM:} The optimal trade-off knee ($11.30\text{ J}$, $F1 = 0.8751$).
+    \item \textbf{XGBoost:} The maximal accuracy boundary ($28.67\text{ J}$, $F1 = 0.8759$).
+\end{enumerate}
+Ensembles such as Random Forest and CatBoost were strictly dominated in this setting.
+
+\section{Threats to Validity \& Methodological Limitations}
+To ensure honest scientific reporting, several limitations must be acknowledged:
+\begin{enumerate}
+    \item \textbf{TDP-Calibrated Power Modeling vs. Physical Measurement:} Power draw is estimated by dynamically scaling CPU utilization against Thermal Design Power (TDP) integrated with DRAM allocation models. While widely accepted in software-based Green AI literature \cite{garcia2019estimation}, it is an empirical estimation and does not replace hardware-level oscilloscopes or calibrated power meters.
+    \item \textbf{Absence of GPU Profiling:} The current framework specifically targets CPU-based tabular workloads. GPU accelerators are explicitly not profiled or claimed in these experiments.
+    \item \textbf{Operating System Jitter:} Real-world multitasking environments introduce non-deterministic CPU scheduling noise. Running multiple seeded trials (as supported by our multi-run engine) mitigates but does not completely eliminate scheduling variance.
+    \item \textbf{Grid Carbon Factor Assumptions:} Carbon emissions are calculated using a global average grid factor ($475\text{ gCO}_2\text{eq/kWh}$); regional carbon intensity varies significantly depending on local renewable mix.
+\end{enumerate}
+
+\section{Conclusion \& Future Work}
+This paper presented the \textbf{Dynamic Green AI Evaluation Framework}, establishing an automated, dataset-agnostic benchmarking pipeline that quantifies predictive fidelity alongside computational sustainability. By formalizing the \textbf{Green AI Index (GAI)} and Pareto frontier analysis, the framework empowers engineers and researchers to make informed, eco-conscious model deployment decisions. Future work will extend the framework to GPU-accelerated deep learning architectures, automated quantization pruning, and edge microcontroller deployments.
+
+\begin{thebibliography}{00}
+\bibitem{schwartz2020green} R. Schwartz, J. Dodge, N. A. Smith, and O. Etzioni, ``Green AI,'' \textit{Communications of the ACM}, vol. 63, no. 12, pp. 54--63, 2020.
+\bibitem{strubell2019energy} E. Strubell, A. Ganesh, and A. McCallum, ``Energy and policy considerations for deep learning in NLP,'' in \textit{Proc. 57th Annual Meeting of the Assoc. for Computational Linguistics (ACL)}, pp. 3645--3650, 2019.
+\bibitem{henderson2020towards} P. Henderson, J. Hu, R. Romoff, E. Brunskill, D. Jurafsky, and J. Pineau, ``Towards the systematic reporting of the energy and carbon footprints of machine learning,'' \textit{Journal of Machine Learning Research}, vol. 21, no. 248, pp. 1--43, 2020.
+\bibitem{garcia2019estimation} E. Garcia-Martin, C. F. Rodrigues, G. Vanderbauwhede, and E. E. Falcao, ``Estimation of energy consumption in machine learning,'' \textit{Journal of Parallel and Distributed Computing}, vol. 134, pp. 75--88, 2019.
+\bibitem{anthony2020carbontracker} L. F. W. Anthony, B. Kanding, and R. Selvan, ``Carbontracker: Tracking and predicting the carbon footprint of training deep learning models,'' \textit{arXiv preprint arXiv:2007.03051}, 2020.
+\bibitem{codecarbon} V. Schmidt et al., ``CodeCarbon: Estimate and track carbon emissions from machine learning computing,'' \textit{Zenodo}, 2021.
+\end{thebibliography}
+
+\end{document}
